@@ -16,6 +16,7 @@ SEARCH_RESULTS_DROPDOWN_CLASS = "n4HaVc "
 DESTINATION_LIST_XPATH = "//ol[@class='SD4Ugf']"
 FLIGHT_PRICE_CLASS = "MJg7fb QB2Jof"
 FLIGHT_DURATION_CLASS = "Xq1DAb"
+FLIGHT_DESTINATION_CLASS = "xyc80b sSHqwe"
 LANGUAGE = "en-US"
 INVALID_ORIGIN_ERROR = ValueError("Origin airport code must be 3 letters, e.g.: YYZ, and correspond to a real airport.")
 NULL_DRIVER_ERROR = ValueError("Please supply a Selenium driver as 'driver' keyword argument")
@@ -88,9 +89,11 @@ def scrape(driver=get_driver(), origin_airport=None, budget=None):
     print("\n".join(d.text for d in duration))
     print(len(duration))
 
-    duration = driver.find_elements(By.XPATH, to_xpath(FLIGHT_PRICE_CLASS))
-    print("\n".join(d.text for d in duration))
-    print(len(duration))
+    prices = driver.find_elements(By.XPATH, to_xpath(FLIGHT_PRICE_CLASS))
+    print("\n".join(p.text for p in prices))
+    print(len(prices))
+
+
 
 
 
