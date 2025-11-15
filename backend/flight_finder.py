@@ -5,7 +5,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
-from scraper_helpers import to_xpath, get_driver
+
+from backend.scraper_helpers import find_all
+from scraper_helpers import to_xpath, get_driver, find_all
 import os
 
 
@@ -85,16 +87,18 @@ def scrape(driver=get_driver(), origin_airport=None, budget=None):
     flights = flight_list_element.find_elements(By.TAG_NAME, "li")
     print(len(flights))
 
-    duration = driver.find_elements(By.XPATH, to_xpath(FLIGHT_DURATION_CLASS))
+
+    duration = find_all(driver, FLIGHT_DURATION_CLASS)
     print("\n".join(d.text for d in duration))
     print(len(duration))
 
-    prices = driver.find_elements(By.XPATH, to_xpath(FLIGHT_PRICE_CLASS))
+    prices = find_all(driver, FLIGHT_PRICE_CLASS)
     print("\n".join(p.text for p in prices))
     print(len(prices))
 
-
-
+    destinations = find_all(driver, FLIGHT_DESTINATION_CLASS)
+    print("\n".join(d.text for d in destinations))
+    print(len(destinations))
 
 
     # when the last scrape has been scraped...

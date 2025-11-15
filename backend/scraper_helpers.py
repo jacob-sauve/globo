@@ -38,22 +38,10 @@ def get_driver(headless=True):
     return driver
 
 
-# def find_nested(driver, successive_class_list):
-#     '''Get element nested within elements of successive classes those in the provided list'''
-#     # if the list is empty
-#     if not successive_class_list:
-#         return [driver]
-#
-#     c = successive_class_list[0]
-#     output = []
-#
-#     WebDriverWait(driver, 10).until(
-#         EC.presence_of_all_elements_located((By.XPATH, "." + to_xpath(c)))
-#     )
-#     elements = driver.find_elements(By.XPATH, "." + to_xpath(c))
-#
-#     for match in elements:
-#         next_layer = find_nested(match, successive_class_list[1:])
-#         output.extend(next_layer)
-#
-#     return output
+def find_all(driver, compoundClass):
+    xpath = to_xpath(compoundClass)
+    WebDriverWait(driver, 30).until(
+        EC.presence_of_all_elements_located((By.XPATH, xpath))
+    )
+    results = driver.find_elements(By.XPATH, xpath)
+    return results
