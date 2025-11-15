@@ -10,7 +10,7 @@ def to_xpath(compoundClass):
 
 
 def get_driver(headless=True):
-    # setup Selenium agent
+    '''Returns a Selenium webdriver, with headless mode toggled if specified'''
     options = Options()
     # !!
     # only activate headless (no view of bot's actions) when everything works
