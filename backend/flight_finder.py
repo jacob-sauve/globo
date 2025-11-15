@@ -16,8 +16,8 @@ FILTER_MENU_CLASS = "VfPpkd-LgbsSe VfPpkd-LgbsSe-OWXEXe-Bz112c-M1Soyc VfPpkd-Lgb
 PRICE_SLIDER_CLASS = "undefined Cs7q4e UlwoYd VfPpkd-SxecR VfPpkd-SxecR-OWXEXe-ALTDOd"
 SEARCH_RESULTS_DROPDOWN_CLASS = "n4HaVc "
 LANGUAGE_BUTTON_CLASS = "VfPpkd-LgbsSe VfPpkd-LgbsSe-OWXEXe-INsAgc VfPpkd-LgbsSe-OWXEXe-Bz112c-M1Soyc VfPpkd-LgbsSe-OWXEXe-dgl2Hf Rj2Mlf OLiIxf PDpWxe LQeN7 my6Xrf wJjnG dA7Fcf CapH0e"
-EN_US_XPATH = "//input[@value='en-GB']"
-LANGUAGE_OK_BUTTON_CLASS = "VfPpkd-LgbsSe VfPpkd-LgbsSe-OWXEXe-dgl2Hf ksBjEc lKxP2d LQeN7 bRx3h yJQRU sIWnMc"
+EN_US_XPATH = "//input[@value='bs']"
+LANGUAGE_OK_BUTTON_XPATH = "//div[@class='I1vvIb' and @data-action='2']"
 INVALID_ORIGIN_ERROR = ValueError("Origin airport code must be 3 letters, e.g.: YYZ, and correspond to a real airport.")
 NULL_DRIVER_ERROR = ValueError("Please supply a Selenium driver as 'driver' keyword argument")
 
@@ -42,6 +42,10 @@ def auto_quit_driver(func):
 # SCRAPER
 @auto_quit_driver
 def scrape(driver=get_driver(), origin_airport=None, budget=None):
+    '''
+    Writes to results.csv with following columns: Origin, Destination, Price, Date
+    Returns True when done writing.
+    '''
     if driver is None:
         raise NULL_DRIVER_ERROR
     if not (type(origin_airport) is str and len(origin_airport) == 3 and origin_airport.isalpha()):
@@ -72,7 +76,8 @@ def scrape(driver=get_driver(), origin_airport=None, budget=None):
     en_us = driver.find_element(By.XPATH, EN_US_XPATH)
     en_us.click()
     sleep(1)
-    ok_button = driver.find_element(By.XPATH, to_xpath(LANGUAGE_OK_BUTTON_CLASS))
+    ok_button = driver.find_element(By.XPATH, LANGUAGE_OK_BUTTON_XPATH)
+    driver.execute_script("arguments[0].scrollIntoView(false);", ok_button)
     ok_button.click()
 
     # get all outbound flights
@@ -105,13 +110,14 @@ def scrape(driver=get_driver(), origin_airport=None, budget=None):
 
     # when the last scrape has been scraped...
     # sleep(60)
+    # WRITE TO CSV
     return True
 
 
 
 # TESTING
 if __name__ == "__main__":
-    origin_airport = input("Origin airport code: ")
+    origin_airport = input("Origin airport code: ").strip()
     max_price = int(input("Budget (CAD): "))
     if scrape(get_driver(headless=False),origin_airport=origin_airport, budget=max_price):
         print("Scrape successful!")
