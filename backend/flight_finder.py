@@ -1,23 +1,36 @@
-from FlightRadar24 import FlightRadar24API
-import datetime
-from dotenv import load_dotenv
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
+from webdriver_manager.firefox import GeckoDriverManager
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from bs4 import BeautifulSoup
+import time as t
 import os
 
-# get login
-load_dotenv()
-username = os.getenv("FR24_USERNAME")
-password = os.getenv("FR24_PASSWORD")
+# CONSTANTS
+DESTINATION_BOX_CLASS = "tsAU4e "
 
-# object to start fetching data
-fr_api = FlightRadar24API()
-if not fr_api.is_logged_in():
-    fr_api.login(username, password)
-config = fr_api.get_flight_tracker_config()
-config.limit = "10"
 
-if __name__ == "__main__":
-    flights = fr_api.get_flights()
-    print(fr_api.get_history_data(flights[0],"CSV", datetime.datetime.now()))
-    # flight_time = datetime.datetime.fromtimestamp(flights.get_flight("").time.scheduled.departure)
-    # print(flight_time)
 
+options = Options()
+options.add_argument("--headless")
+options.add_argument("--disable-gpu")
+options.add_argument(
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, \
+like Gecko) Firefox/91.0 Safari/537.36"
+    )
+
+service = Service(GeckoDriverManager().install())
+driver = webdriver.Firefox(options=options)
+
+url = "https://www.google.com/travel/explore"
+driver.get(url)
+
+# wait until results load + catch them
+destinations = WebDriverWait(driver, 30).until(
+        EC.presence_of_all_elements_located((By.CLASS_NAME, DESTINATION_BOX_CLASS))
+    )
+
+print(driver.page_source)
