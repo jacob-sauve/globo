@@ -12,12 +12,11 @@ import os
 
 # CONSTANTS
 ORIGIN_INPUT_CLASS = "II2One j0Ppje zmMKJ LbIaRd"
-FILTER_MENU_CLASS = "VfPpkd-LgbsSe VfPpkd-LgbsSe-OWXEXe-Bz112c-M1Soyc VfPpkd-LgbsSe-OWXEXe-dgl2Hf ksBjEc lKxP2d LQeN7 bRx3h x4Vnpe yJQRU sIWnMc hNyRxf cd29Sd"
-PRICE_SLIDER_CLASS = "undefined Cs7q4e UlwoYd VfPpkd-SxecR VfPpkd-SxecR-OWXEXe-ALTDOd"
 SEARCH_RESULTS_DROPDOWN_CLASS = "n4HaVc "
-LANGUAGE_BUTTON_CLASS = "VfPpkd-LgbsSe VfPpkd-LgbsSe-OWXEXe-INsAgc VfPpkd-LgbsSe-OWXEXe-Bz112c-M1Soyc VfPpkd-LgbsSe-OWXEXe-dgl2Hf Rj2Mlf OLiIxf PDpWxe LQeN7 my6Xrf wJjnG dA7Fcf CapH0e"
-EN_US_XPATH = "//input[@value='bs']"
-LANGUAGE_OK_BUTTON_XPATH = "//div[@class='I1vvIb' and @data-action='2']"
+DESTINATION_LIST_XPATH = "//ol[@class='SD4Ugf']"
+FLIGHT_PRICE_CLASS = "MJg7fb QB2Jof"
+FLIGHT_DURATION_CLASS = "Xq1DAb"
+LANGUAGE = "en-US"
 INVALID_ORIGIN_ERROR = ValueError("Origin airport code must be 3 letters, e.g.: YYZ, and correspond to a real airport.")
 NULL_DRIVER_ERROR = ValueError("Please supply a Selenium driver as 'driver' keyword argument")
 
@@ -43,9 +42,11 @@ def auto_quit_driver(func):
 @auto_quit_driver
 def scrape(driver=get_driver(), origin_airport=None, budget=None):
     '''
-    Writes to results.csv with following columns: Origin, Destination, Price, Date
+    Writes to results.csv with following columns: Origin, Destination, Price, Date, IMG_URL
     Returns True when done writing.
     '''
+    output_dict = dict()
+
     if driver is None:
         raise NULL_DRIVER_ERROR
     if not (type(origin_airport) is str and len(origin_airport) == 3 and origin_airport.isalpha()):
@@ -54,7 +55,7 @@ def scrape(driver=get_driver(), origin_airport=None, budget=None):
     origin_airport = origin_airport.upper()
 
     # access URL
-    url = "https://www.google.com/travel/explore"
+    url = f"https://www.google.com/travel/explore?hl={LANGUAGE}"
     driver.get(url)
 
     # wait until input box loads
@@ -64,23 +65,7 @@ def scrape(driver=get_driver(), origin_airport=None, budget=None):
         )
     print("Loaded!")
 
-    # HTML beautification
-    html = driver.page_source
-
-    # switch language to English
-    language_toggle = WebDriverWait(driver, 30).until(
-        EC.presence_of_element_located((By.XPATH, to_xpath(LANGUAGE_BUTTON_CLASS)))
-    )
-    language_toggle.click()
-    sleep(1)
-    en_us = driver.find_element(By.XPATH, EN_US_XPATH)
-    en_us.click()
-    sleep(1)
-    ok_button = driver.find_element(By.XPATH, LANGUAGE_OK_BUTTON_XPATH)
-    driver.execute_script("arguments[0].scrollIntoView(false);", ok_button)
-    ok_button.click()
-
-    # get all outbound flights
+    # launch search for all outbound flights
     try:
         point_of_origin_input.clear()
         point_of_origin_input.send_keys(origin_airport)
@@ -92,21 +77,22 @@ def scrape(driver=get_driver(), origin_airport=None, budget=None):
     except:
         raise INVALID_ORIGIN_ERROR
 
-    # sort by price
-    if type(budget) is int and budget > 0:
-        sleep(3)
+    # collect all possible flights
+    flight_list_element = WebDriverWait(driver, 30).until(
+        EC.presence_of_element_located((By.XPATH, DESTINATION_LIST_XPATH))
+    )
+    flights = flight_list_element.find_elements(By.TAG_NAME, "li")
+    print(len(flights))
+
+    duration = driver.find_elements(By.XPATH, to_xpath(FLIGHT_DURATION_CLASS))
+    print("\n".join(d.text for d in duration))
+    print(len(duration))
+
+    duration = driver.find_elements(By.XPATH, to_xpath(FLIGHT_PRICE_CLASS))
+    print("\n".join(d.text for d in duration))
+    print(len(duration))
 
 
-        # filter_menu = WebDriverWait(driver, 30).until(
-        #     EC.presence_of_element_located((By.XPATH, to_xpath(FILTER_MENU_CLASS)))
-        # )
-        # filter_menu.click()
-        # price_slider = WebDriverWait(driver, 30).until(
-        #     EC.presence_of_element_located((By.XPATH, to_xpath(PRICE_SLIDER_CLASS)))
-        # )
-        while True:
-            # price_slider.click()
-            sleep(1)
 
     # when the last scrape has been scraped...
     # sleep(60)
