@@ -65,8 +65,8 @@
 
     return <Globe
       ref={globeEl}
-      //globeImageUrl="//cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg"
-      globeImageUrl="https://github.com/jacob-sauve/globo/blob/ivan/frontend/earth4k.jpg" //source:
+      globeImageUrl="//cdn.jsdelivr.net/gh/jacob-sauve/globo@ivan/frontend/earth4k.jpg" //source: https://github.com/turban/webgl-earth/blob/master/images/2_no_clouds_4k.jpg
+      backgroundImageUrl="//cdn.jsdelivr.net/gh/jacob-sauve/globo@ivan/frontend/blobo.png"
 
       arcsData={routes}
       arcLabel={d => `${d.airline}: ${d.srcIata} &#8594; ${d.dstIata}`}
