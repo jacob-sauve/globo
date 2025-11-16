@@ -157,8 +157,7 @@ def scrape(driver=DRIVER, origin_airport=None, budget=None, destination_filter=N
         filtered = values
     # filter destinations
     if type(destination_filter) is list:
-        temp = filter(lambda v: v[1] in destination_filter, filtered) # to avoid iterator exhaustion
-        filtered = temp
+        filtered = list(filter(lambda v: v[1] in destination_filter, filtered)) # to avoid iterator exhaustion
 
     # csv entries
     entries = [dict(zip(ORDERED_CSV_HEADERS, val)) for val in filtered]

@@ -20,9 +20,10 @@ def search(client=client, prompt=None, budget=None, origin_airport=None):
         messages=[
             {
                 "role": "user",
-                "content": "You are a travel agent. Take the following prompt from a user who "\
-                "is trying to plan a trip and generate a list of regions/countries/cities which would "\
-                f"correspond to their travel needs: 'Take me somewhere {prompt}'"
+                "content": f"You are a travel agent. Take the following prompt from a user from near airport"
+                f" {origin_airport} who is trying to plan a trip and generate a list of regions/countries/cities"
+                f" which would correspond to their travel needs (budge of around {budget} CAD):"
+                f" 'Take me somewhere {prompt}'"
             }
         ],
     )
