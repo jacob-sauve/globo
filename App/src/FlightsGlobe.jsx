@@ -64,11 +64,12 @@ export default function FlightsGlobe() {
       arcStartLng={d => +d.srcAirport.lng}
       arcEndLat={d => +d.dstAirport.lat}
       arcEndLng={d => +d.dstAirport.lng}
+      arcStroke={1}
       arcDashLength={0.25}
       arcDashGap={1}
       arcDashInitialGap={() => Math.random()}
       arcDashAnimateTime={4000}
-      arcColor={() => ["rgba(0,255,0,0.22)", "rgba(255,0,0,0.22)"]}
+      arcColor={() => ["rgba(96,227,74,0.54)", "rgba(36,166,223,0.81)"]}
       arcsTransitionDuration={0}
       pointsData={airports}
       pointColor={() => "orange"}
