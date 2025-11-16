@@ -5,10 +5,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
-
-from backend.scraper_helpers import find_all
 from scraper_helpers import to_xpath, get_driver, find_all
-import os
+import re
 
 
 
@@ -18,7 +16,23 @@ SEARCH_RESULTS_DROPDOWN_CLASS = "n4HaVc "
 DESTINATION_LIST_XPATH = "//ol[@class='SD4Ugf']"
 FLIGHT_PRICE_CLASS = "MJg7fb QB2Jof"
 FLIGHT_DURATION_CLASS = "Xq1DAb"
-FLIGHT_DESTINATION_CLASS = "xyc80b sSHqwe"
+FLIGHT_DATE_CLASS = "xyc80b sSHqwe"
+FLIGHT_DESTINATION_CLASS = "W6bZuc YMlIz"
+DESTINATION_IMAGE_CLASS = "EWmqCb "
+ORDERED_CSV_HEADERS = [
+    "Price",
+    "Destination",
+    "Date",
+    "Duration",
+    "Origin",
+    "IMG URL",
+]
+ORDERED_CSV_HEADER_CLASSES = [
+    FLIGHT_PRICE_CLASS,
+    FLIGHT_DESTINATION_CLASS,
+    FLIGHT_DATE_CLASS,
+    FLIGHT_DURATION_CLASS,
+]
 LANGUAGE = "en-US"
 INVALID_ORIGIN_ERROR = ValueError("Origin airport code must be 3 letters, e.g.: YYZ, and correspond to a real airport.")
 NULL_DRIVER_ERROR = ValueError("Please supply a Selenium driver as 'driver' keyword argument")
@@ -27,6 +41,7 @@ NULL_DRIVER_ERROR = ValueError("Please supply a Selenium driver as 'driver' keyw
 
 # WRAPPER (TO GUARANTEE SELENIUM DRIVER CLEANUP)
 def auto_quit_driver(func):
+    """Wrapper to guarantee that the Selenium driver quits post-use"""
     @wraps(func)
     def wrapper(driver, *args, **kwargs):
         try:
@@ -44,10 +59,10 @@ def auto_quit_driver(func):
 # SCRAPER
 @auto_quit_driver
 def scrape(driver=get_driver(), origin_airport=None, budget=None):
-    '''
-    Writes to results.csv with following columns: Origin, Destination, Price, Date, IMG_URL
+    """
+    Writes to results.csv with following columns: Price, Destination, Date, Duration, Origin, IMG_URL
     Returns True when done writing.
-    '''
+    """
     output_dict = dict()
 
     if driver is None:
@@ -87,19 +102,36 @@ def scrape(driver=get_driver(), origin_airport=None, budget=None):
     flights = flight_list_element.find_elements(By.TAG_NAME, "li")
     print(len(flights))
 
+    # get each data point in order:
+    data = list()
+    for column_class in ORDERED_CSV_HEADER_CLASSES:
+        elements = find_all(driver, column_class)
+        vals = [e.text for e in elements] # to prevent stale reference
+        data.append(vals)
 
-    duration = find_all(driver, FLIGHT_DURATION_CLASS)
-    print("\n".join(d.text for d in duration))
-    print(len(duration))
+    # add origin airport (always same)
+    data.append([origin_airport] * len(data[0]))
 
-    prices = find_all(driver, FLIGHT_PRICE_CLASS)
-    print("\n".join(p.text for p in prices))
-    print(len(prices))
+    # specific case - image URLs
+    elements = find_all(driver, DESTINATION_IMAGE_CLASS)
+    # clean up URL fetched from style attribute
+    vals = [e.get_attribute("style") for e in elements]
+    data.append([re.sub(r"(background-image:url\\\('|,url\('\/\/.*?'\))$", "", v) for v in vals])
 
-    destinations = find_all(driver, FLIGHT_DESTINATION_CLASS)
-    print("\n".join(d.text for d in destinations))
-    print(len(destinations))
 
+    values = zip(*data)
+
+    print("values:\n"+"\n".join(str(v) for v in values))
+
+    # filter according to budget if valid one provided
+    if type(budget) is int and budget > 0:
+        values = filter(lambda v: int(re.sub(r"\D", "", v[0])) <= budget, values)
+
+    print("filtered values:\n"+"\n".join(str(v) for v in list(values)))
+
+    # csv entries
+    entries = [dict(zip(ORDERED_CSV_HEADERS, v)) for v in values]
+    print(entries)
 
     # when the last scrape has been scraped...
     # sleep(60)

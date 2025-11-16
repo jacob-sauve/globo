@@ -5,23 +5,22 @@ from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from time import sleep
 
 
 
 def to_xpath(compoundClass):
-    '''Packs compound class name into xpath usable by Selenium'''
+    """Packs compound class name into xpath usable by Selenium"""
     return f"//*[@class='{compoundClass}']"
 
 
 def to_css_selector(compoundClass):
-    '''Turns compound class name into CSS selector usable by Selenium'''
+    """Turns compound class name into CSS selector usable by Selenium"""
     classList = compoundClass.split()
     return "." + ".".join(classList)
 
 
 def get_driver(headless=True):
-    '''Returns a Selenium webdriver, with headless mode toggled if specified'''
+    """Returns a Selenium webdriver, with headless mode toggled if specified"""
     options = Options()
     # !!
     # only activate headless (no view of bot's actions) when everything works
@@ -39,6 +38,7 @@ def get_driver(headless=True):
 
 
 def find_all(driver, compoundClass):
+    """Increases reliability by ensuring elements loaded in before parsing DOM"""
     xpath = to_xpath(compoundClass)
     WebDriverWait(driver, 30).until(
         EC.presence_of_all_elements_located((By.XPATH, xpath))
