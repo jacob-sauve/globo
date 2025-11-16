@@ -62,7 +62,7 @@ def auto_quit_driver(func):
 
 # SCRAPER
 @auto_quit_driver
-def scrape(driver=DRIVER, origin_airport=None, budget=None, destination_filter=None):
+def scrape(driver=DRIVER, origin_airport=None, budget=None):
     """
     Writes to results.csv with following columns: Price, Destination, Date, Duration, Origin, IMG_URL
     Returns True when done writing.
@@ -155,9 +155,6 @@ def scrape(driver=DRIVER, origin_airport=None, budget=None, destination_filter=N
         # print("filtered values:\n" + "\n".join(str(v) for v in list(filtered)))
     else:
         filtered = values
-    # filter destinations
-    if type(destination_filter) is list:
-        filtered = list(filter(lambda v: v[1] in destination_filter, filtered)) # to avoid iterator exhaustion
 
     # csv entries
     entries = [dict(zip(ORDERED_CSV_HEADERS, val)) for val in filtered]
