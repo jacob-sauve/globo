@@ -46,6 +46,7 @@ export default function App() {
               style={{
                   transform: "scale(4)",
                   transformOrigin: "top center",
+                  marginLeft: "200px",
                   display: "flex",
                   flexDirection: "row",
                   alignItems: "center",
@@ -75,6 +76,11 @@ export default function App() {
                   }}
               />
 
+              <input
+                  type="number"
+                  placeholder="Airport Code"
+                  style={{padding: "0.8rem", borderRadius: "8px", border: "none", width: "120px"}}
+              />
 
               <input
                   type="date"
