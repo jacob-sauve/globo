@@ -12,6 +12,7 @@ import csv
 
 
 # CONSTANTS
+DRIVER = get_driver()
 ORIGIN_INPUT_CLASS = "II2One j0Ppje zmMKJ LbIaRd"
 SEARCH_RESULTS_DROPDOWN_CLASS = "n4HaVc "
 MAP_AREA_XPATH = "//div[@data-ved='2ahUKEwjysc-3xvWQAxUKpqsHHXmVLkwQs40DegQIAxAv']"
@@ -61,7 +62,7 @@ def auto_quit_driver(func):
 
 # SCRAPER
 @auto_quit_driver
-def scrape(driver=get_driver(), origin_airport=None, budget=None, destination_filter=None):
+def scrape(driver=DRIVER, origin_airport=None, budget=None, destination_filter=None):
     """
     Writes to results.csv with following columns: Price, Destination, Date, Duration, Origin, IMG_URL
     Returns True when done writing.

@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
+from flight_finder import scrape, DRIVER
 
 
 
@@ -13,21 +14,44 @@ client = OpenAI(
 
 
 
-def search(client=client, prompt=None, budget=None):
-    completion = client.chat.completions.create(
+def search(client=client, prompt=None, budget=None, origin_airport=None):
+    spiel = client.chat.completions.create(
         model="openai/gpt-oss-120b:fastest",
         messages=[
             {
                 "role": "user",
-                "content": prompt
+                "content": "You are a travel agent. Take the following prompt from a user who "\
+                "is trying to plan a trip and generate a list of regions/countries/cities which would "\
+                f"correspond to their travel needs: 'Take me somewhere {prompt}'"
             }
         ],
     )
-    print(completion)
-    return completion
+    airportCodeList = client.chat.completions.create(
+        model="openai/gpt-oss-120b:fastest",
+        messages=[
+            {
+                "role": "user",
+                "content": "Take the following text from a travel agent and generate ONLY a comma-separated"\
+                " list of relevant 3-letter airport codes corresponding to the mentioned regions/countries/cities"\
+                f": '{spiel.choices[0].message.content}'"
+            }
+        ],
+    ).choices[0].message.content.split(",")
+
+    try:
+        scrape(driver=DRIVER, origin_airport=origin_airport, budget=budget, destination_filter=airportCodeList)
+    except ValueError:
+        try:
+            scrape(driver=DRIVER, origin_airport="ATL", budget=budget, destination_filter=airportCodeList)
+        except:
+            scrape(driver=DRIVER, origin_airport="ATL", budget=None, destination_filter=airportCodeList)
+
+    print(airportCodeList)
+
+    return "../../frontend/results.csv"
 
 
 
 # TESTING
 if __name__ == "__main__":
-    print(search(prompt="what's up broski").choices[0].message)
+    print(search(prompt="I can dream", budget=99, origin_airport="ORY"))
