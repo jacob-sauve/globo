@@ -4,7 +4,6 @@ from functools import wraps
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.keys import Keys
 from scraper_helpers import to_xpath, get_driver, find_all
 import re
 import csv
@@ -35,6 +34,7 @@ ORDERED_CSV_HEADER_CLASSES = [
     FLIGHT_DURATION_CLASS,
 ]
 LANGUAGE = "en-US"
+MAX_ATTEMPTS = 5000
 INVALID_ORIGIN_ERROR = ValueError("Origin airport code must be 3 letters, e.g.: YYZ, and correspond to a real airport.")
 NULL_DRIVER_ERROR = ValueError("Please supply a Selenium driver as 'driver' keyword argument")
 
@@ -59,7 +59,7 @@ def auto_quit_driver(func):
 
 # SCRAPER
 @auto_quit_driver
-def scrape(driver=get_driver(), origin_airport=None, budget=None):
+def scrape(driver=get_driver(), origin_airport=None, budget=None, destination_filter=None):
     """
     Writes to results.csv with following columns: Price, Destination, Date, Duration, Origin, IMG_URL
     Returns True when done writing.
@@ -106,7 +106,8 @@ def scrape(driver=get_driver(), origin_airport=None, budget=None):
     # get each data point in order:
     data = list()
     for column_class in ORDERED_CSV_HEADER_CLASSES:
-        while True:
+        # print("trying...")
+        for i in range(MAX_ATTEMPTS):
             try:
                 elements = find_all(driver, column_class)
                 vals = [e.text for e in elements] # to prevent stale reference
@@ -119,7 +120,8 @@ def scrape(driver=get_driver(), origin_airport=None, budget=None):
     data.append([origin_airport] * len(data[0]))
 
     # specific case - image URLs
-    while True:
+    for i in range(MAX_ATTEMPTS):
+        # print("trying...")
         try:
             elements = find_all(driver, DESTINATION_IMAGE_CLASS)
             # clean up URL fetched from style attribute
@@ -133,11 +135,20 @@ def scrape(driver=get_driver(), origin_airport=None, budget=None):
     print("headers:", *ORDERED_CSV_HEADERS, sep="\n")
     # print("values:\n"+"\n".join(str(v) for v in values))
 
-    # csv entries
-    entries = [dict(zip(ORDERED_CSV_HEADERS, v)) for v in values]
-    print(entries)
+    # filter price
+    if type(budget) is int and budget > 0:
+        filtered = filter(lambda v: int(re.sub(r"\D", "", v[0])) <= budget, values)
+        # print("filtered values:\n" + "\n".join(str(v) for v in list(filtered)))
+    else:
+        filtered = values
+    # filter destinations
+    if type(destination_filter) is list:
+        temp = filter(lambda v: v[1] in destination_filter, filtered) # to avoid iterator exhaustion
+        filtered = temp
 
-    # FILTER STUFF
+    # csv entries
+    entries = [dict(zip(ORDERED_CSV_HEADERS, val)) for val in filtered]
+    print(entries)
 
     # when the last scrape has been scraped...
     # write to csv
@@ -147,18 +158,6 @@ def scrape(driver=get_driver(), origin_airport=None, budget=None):
         for entry in entries:
             writer.writerow(entry)
 
-    return entries
-
-
-def filter(entries, headers, filter_column):
-    """!!TO-DO!!"""
-    # filter according to budget if valid one provided
-    if type(budget) is int and budget > 0:
-        values = filter(lambda v: int(re.sub(r"\D", "", v[0])) <= budget, values)
-
-    print("filtered values:\n" + "\n".join(str(v) for v in list(values)))
-
-    # CHANGE!!!!
     return entries
 
 
