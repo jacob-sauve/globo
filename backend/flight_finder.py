@@ -5,6 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from scraper_helpers import to_xpath, get_driver, find_all
+from selenium.webdriver.common.keys import Keys
 import re
 import csv
 
@@ -13,6 +14,7 @@ import csv
 # CONSTANTS
 ORIGIN_INPUT_CLASS = "II2One j0Ppje zmMKJ LbIaRd"
 SEARCH_RESULTS_DROPDOWN_CLASS = "n4HaVc "
+MAP_AREA_XPATH = "//div[@data-ved='2ahUKEwjysc-3xvWQAxUKpqsHHXmVLkwQs40DegQIAxAv']"
 DESTINATION_LIST_XPATH = "//ol[@class='SD4Ugf']"
 FLIGHT_PRICE_CLASS = "MJg7fb QB2Jof"
 FLIGHT_DURATION_CLASS = "Xq1DAb"
@@ -95,6 +97,17 @@ def scrape(driver=get_driver(), origin_airport=None, budget=None, destination_fi
         driver.find_element(By.XPATH, to_xpath(SEARCH_RESULTS_DROPDOWN_CLASS)).click()
     except:
         raise INVALID_ORIGIN_ERROR
+
+    # zoom out Google Maps to get max number of flights
+    body = driver.find_element(By.TAG_NAME, "body")
+    # body.click()
+    for i in range(10):
+        print("zooming out...")
+        # try:
+        body.send_keys(Keys.CONTROL, "-")
+        # except:
+        #     break
+        sleep(0.1)
 
     # collect all possible flights
     flight_list_element = WebDriverWait(driver, 30).until(
