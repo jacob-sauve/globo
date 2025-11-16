@@ -42,8 +42,9 @@ def search(client=client, prompt=None, budget=None, origin_airport=None):
         ],
     ).choices[0].message.content.split(",")
     destination_filter = [d.upper().strip() for d in destination_filter]
+    print(destination_filter)
 
-    filtered_results = [d for d in results if d.get("Destination") in destination_filter]
+    filtered_results = [d for d in results if d.get("Destination").upper().strip() in destination_filter]
     airport_codes = client.chat.completions.create(
         model="openai/gpt-oss-120b:fastest",
         messages=[
@@ -56,7 +57,8 @@ def search(client=client, prompt=None, budget=None, origin_airport=None):
         ],
     ).choices[0].message.content.split(",")
     for i, result in enumerate(filtered_results):
-        result["Destination"] = airport_codes[i]
+        print(result)
+        result["Destination"] = airport_codes[i].upper().strip()
 
     # write to csv
     with open("../frontend/results.csv", "w") as csvfile:
