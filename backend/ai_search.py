@@ -1,7 +1,8 @@
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
-from flight_finder import scrape, DRIVER
+from flight_finder import scrape, DRIVER, ORDERED_CSV_HEADERS
+import csv
 
 
 
@@ -15,39 +16,56 @@ client = OpenAI(
 
 
 def search(client=client, prompt=None, budget=None, origin_airport=None):
-    spiel = client.chat.completions.create(
+    # do the scraping
+    try:
+        results = scrape(driver=DRIVER, origin_airport=origin_airport, budget=budget)
+    except ValueError:
+        try:
+            # most frequently flown airport ==> Atlanta
+            results = scrape(driver=DRIVER, origin_airport="ATL", budget=budget)
+        except:
+            results = scrape(driver=DRIVER, origin_airport="ATL", budget=None)
+
+    # ai filter
+    destination_filter = client.chat.completions.create(
         model="openai/gpt-oss-120b:fastest",
         messages=[
             {
                 "role": "user",
-                "content": f"You are a travel agent. Take the following prompt from a user from near airport"
-                f" {origin_airport} who is trying to plan a trip and generate a list of regions/countries/cities"
-                f" which would correspond to their travel needs (budge of around {budget} CAD):"
-                f" 'Take me somewhere {prompt}'"
-            }
-        ],
-    )
-    airportCodeList = client.chat.completions.create(
-        model="openai/gpt-oss-120b:fastest",
-        messages=[
-            {
-                "role": "user",
-                "content": "Take the following text from a travel agent and generate ONLY a comma-separated"\
-                " list of relevant 3-letter airport codes corresponding to the mentioned regions/countries/cities"\
-                f": '{spiel.choices[0].message.content}'"
+                "content": f"You are a travel agent. You will receive 2 inputs: (1) a prompt from a user from near airport"
+                           f" {origin_airport} who is trying to plan a trip and generate a list of regions/countries/cities"
+                           f" which would correspond to their travel needs; and (2) a list of possible destinations. Your job"
+                           f" is to select the top {min(10, len(results)) or 1} destinations from the list. Answer ONLY a comma-separated list of the chosen"
+                           f" destinations, named exactly (character-perfect) as they are in the provided list (2). Here are the inputs, in order:"
+                           f" (1) 'Take me somewhere {prompt}'; (2) Possible destinations: {",".join(d.get("Destination", "") for d in results)}"
             }
         ],
     ).choices[0].message.content.split(",")
+    destination_filter = [d.upper().strip() for d in destination_filter]
+    print(destination_filter)
 
-    try:
-        scrape(driver=DRIVER, origin_airport=origin_airport, budget=budget, destination_filter=airportCodeList)
-    except ValueError:
-        try:
-            scrape(driver=DRIVER, origin_airport="ATL", budget=budget, destination_filter=airportCodeList)
-        except:
-            scrape(driver=DRIVER, origin_airport="ATL", budget=None, destination_filter=airportCodeList)
+    filtered_results = [d for d in results if d.get("Destination").upper().strip() in destination_filter]
+    airport_codes = client.chat.completions.create(
+        model="openai/gpt-oss-120b:fastest",
+        messages=[
+            {
+                "role": "user",
+                "content": f"Turn the following ordered list of destinations into an list of corresponding nearest"
+                           f" airport codes in the same order. Answer ONLY as a comma-separated list of 3-letter"
+                           f" airport codes. The destinations, in order, are: {",".join(d.get("Destination", "") for d in filtered_results)}"
+            }
+        ],
+    ).choices[0].message.content.split(",")
+    for i, result in enumerate(filtered_results):
+        print(result)
+        result["Destination"] = airport_codes[i].upper().strip()
 
-    print(airportCodeList)
+    # write to csv
+    with open("../frontend/results.csv", "w") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=ORDERED_CSV_HEADERS)
+        writer.writeheader()
+        for entry in filtered_results:
+            writer.writerow(entry)
 
     return "../../frontend/results.csv"
 

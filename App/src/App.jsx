@@ -1,6 +1,7 @@
 import FlightsGlobe from "./FlightsGlobe.jsx";
 import TextAnimation from "./TextAnimation.jsx";
 import BloboLogo from "./assets/blobo.png";
+import FlightForm from "./FlightForm.jsx";
 
 
 export default function App() {
@@ -42,59 +43,7 @@ export default function App() {
           </div>
 
 
-          <div
-              style={{
-                  transform: "scale(4)",
-                  transformOrigin: "top center",
-                  display: "flex",
-                  flexDirection: "row", // line layout
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "1rem",
-                  width: "100%",
-                  padding: "2rem",
-                  backgroundColor: "rgba(0,0,0,0.3)",
-                  borderRadius: "16px",
-                  backdropFilter: "blur(10px)",
-              }}
-          >
-              <input
-                  type="text"
-                  placeholder="From (city/airport)"
-                  style={{padding: "0.8rem", borderRadius: "8px", border: "none", width: "180px"}}
-              />
-              <input
-                  type="text"
-                  placeholder="To (city/airport)"
-                  style={{padding: "0.8rem", borderRadius: "8px", border: "none", width: "180px"}}
-              />
-              <input
-                  type="date"
-                  style={{padding: "0.8rem", borderRadius: "8px", border: "none"}}
-              />
-              <input
-                  type="date"
-                  style={{padding: "0.8rem", borderRadius: "8px", border: "none"}}
-              />
-              <input
-                  type="number"
-                  placeholder="Max price ($)"
-                  style={{padding: "0.8rem", borderRadius: "8px", border: "none", width: "120px"}}
-              />
-              <button
-                  style={{
-                      padding: "0.8rem 1.5rem",
-                      borderRadius: "8px",
-                      backgroundColor: "#1a73e8",
-                      color: "white",
-                      border: "none",
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                  }}
-              >
-                  Search
-              </button>
-          </div>
+          <FlightForm />
 
 
           {/* Globe */}
