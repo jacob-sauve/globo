@@ -53,8 +53,8 @@ export default function FlightsGlobe() {
   return (
   <div>
     <Globe
-      width = {4500}
-      height ={2000}
+      width = {4800}
+      height ={3500}
       ref={globeEl}
       globeImageUrl="//cdn.jsdelivr.net/gh/jacob-sauve/globo@ivan/frontend/earth4k.jpg"
       backgroundImageUrl="//cdn.jsdelivr.net/gh/jacob-sauve/globo@main/frontend/winterequi.jpg"
