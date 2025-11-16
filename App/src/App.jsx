@@ -46,8 +46,9 @@ export default function App() {
               style={{
                   transform: "scale(4)",
                   transformOrigin: "top center",
+                  marginLeft: "200px",
                   display: "flex",
-                  flexDirection: "row", // line layout
+                  flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "1rem",
@@ -60,14 +61,27 @@ export default function App() {
           >
               <input
                   type="text"
-                  placeholder="From (city/airport)"
-                  style={{padding: "0.8rem", borderRadius: "8px", border: "none", width: "180px"}}
+                  placeholder="Take me somewhere I can dream..."
+                  style={{
+                      padding: "1rem 1.8rem",
+                      borderRadius: "14px",
+                      border: "none",
+                      width: "380px",       // ⬅️ bigger width
+                      height: "60px",       // ⬅️ taller input
+                      fontSize: "1rem",     // ⬅️ bigger text
+                      textAlign: "left",    // ⬅️ feels more like a chatbox
+                      background: "rgba(255,255,255,0.18)",
+                      backdropFilter: "blur(12px)",
+                      color: "white"
+                  }}
               />
+
               <input
-                  type="text"
-                  placeholder="To (city/airport)"
-                  style={{padding: "0.8rem", borderRadius: "8px", border: "none", width: "180px"}}
+                  type="number"
+                  placeholder="Airport Code"
+                  style={{padding: "0.8rem", borderRadius: "8px", border: "none", width: "120px"}}
               />
+
               <input
                   type="date"
                   style={{padding: "0.8rem", borderRadius: "8px", border: "none"}}
@@ -81,6 +95,7 @@ export default function App() {
                   placeholder="Max price ($)"
                   style={{padding: "0.8rem", borderRadius: "8px", border: "none", width: "120px"}}
               />
+
               <button
                   style={{
                       padding: "0.8rem 1.5rem",
