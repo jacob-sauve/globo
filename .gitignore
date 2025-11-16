@@ -1,5 +1,5 @@
 /.venv/
-/backend/.env
+**/.env
 /backend/setup.sh
 *.pyc
 __pycache__/
