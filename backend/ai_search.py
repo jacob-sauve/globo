@@ -19,7 +19,7 @@ def search(client=client, prompt=None, budget=None):
         messages=[
             {
                 "role": "user",
-                "content": "How many 'G's in 'huggingface'?"
+                "content": prompt
             }
         ],
     )
