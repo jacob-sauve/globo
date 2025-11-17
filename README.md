@@ -16,24 +16,24 @@ We are very happy of what we could accomplish in 48 hours, we learnt incredibly 
 
 ## Install & run instructions
 
-1️⃣ Clone the Repository
+### Clone the Repository
 ```bash
 git clone https://github.com/your-username/your-repo.git
 cd your-repo
 ```
 
-2️⃣ Backend Setup (Python)
+### Backend Setup (Python)
 ```bash
 python -m venv venv
 ```
-Mac / Linux
-Windows (PowerShell)
-Install dependencies:
-Acquire Hugging Face token and add to backend/.env:
+#### Mac / Linux
+#### Windows (PowerShell)
+### Install dependencies:
+### Acquire Hugging Face token and add to backend/.env:
 
 
 
-3️⃣ Frontend Setup (Vite)
+## Frontend Setup (Vite)
 ```bash
 cd App
 npm install
